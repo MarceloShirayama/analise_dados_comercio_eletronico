@@ -3,9 +3,11 @@ from pprint import pprint
 import pandas as pd
 import sqlalchemy
 
-str_conn = 'sqlite:///{path}'
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# diretórios e sub-diretórios do projeto
+BASE_DIR = os.path.dirname(
+     os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 
 print(f"base_dir: {BASE_DIR}")
@@ -14,6 +16,7 @@ print(f"data_dir: {DATA_DIR}")
 files_names = [i for i in os.listdir(DATA_DIR) if i.endswith('.csv')]
 
 # abrindo a conexão com o banco
+str_conn = 'sqlite:///{path}'
 str_conn = str_conn.format(path=os.path.join(DATA_DIR, 'olist.db'))
 conn = sqlalchemy.create_engine(str_conn)
 
