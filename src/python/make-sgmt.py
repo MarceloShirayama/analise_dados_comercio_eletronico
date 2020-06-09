@@ -3,7 +3,7 @@ import sqlalchemy
 import argparse
 import pandas as pd
 import sqlite3
-# from datetime import datetime, timedelta
+from utils.utils import import_query, connect_db, execute_many_sql
 
 
 # diretórios e sub-diretórios do projeto
@@ -13,27 +13,24 @@ DATA_DIR = os.path.join(BASE_DIR, 'data')
 SQL_DIR = os.path.join(BASE_DIR, 'src', 'sql')
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--date_end', '-e', help='Data fim da extração', default='2018-06-01')
+parser.add_argument(
+     '--date_end',
+     '-e', help='Data fim da extração',
+     default='2018-06-01')
 args = parser.parse_args()
 
 date_end = args.date_end
-# date_init = datetime.strptime(date_end, '%Y-%m-%d') - timedelta(days=365)
-# date_init = date_init.strftime('%Y-%m-%d')
 ano = int(date_end.split('-')[0]) - 1
 mes = int(date_end.split('-')[1])
 date_init = f'{ano}-{mes}-01'
 
 # importa a query
-with open(os.path.join(SQL_DIR, 'segmentos.sql')) as query_file:
-    query = query_file.read()
-
+query = import_query(os.path.join(SQL_DIR, 'segmentos.sql'))
 query = query.format(date_init = date_init,
                     date_end = date_end)
 
 # abrindo a conexão com o banco
-str_conn = 'sqlite:///{path}'
-str_conn = str_conn.format(path=os.path.join(DATA_DIR, 'olist.db'))
-conn = sqlalchemy.create_engine(str_conn)
+conn = connect_db()
 
 create_query = f"""
 CREATE TABLE tb_seller_sgmt AS 
@@ -47,7 +44,6 @@ INSERT INTO tb_seller_sgmt
 ;"""
 
 try:
-    conn.execute(create_query)
+    execute_many_sql(create_query, conn)
 except: 
-    for q in insert_query.split(';')[:-1]:
-        conn.execute(q)
+    execute_many_sql(insert_query, conn, verbose=True)
